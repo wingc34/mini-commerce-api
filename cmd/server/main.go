@@ -5,11 +5,27 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/wingc34/mini-commerce-api/internal/config"
+	"github.com/wingc34/mini-commerce-api/internal/database"
 )
 
 func main() {
 	// Load config from .env
 	cfg := config.Load()
+
+	// Connect to database
+	db, err := database.Connect(cfg.DatabaseURL)
+	if err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
+	}
+
+	// Verify connection is alive
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatalf("Failed to get database instance: %v", err)
+	}
+	if err := sqlDB.Ping(); err != nil {
+		log.Fatalf("Database ping failed: %v", err)
+	}
 
 	// Set Gin mode based on environment
 	if cfg.Env == "production" {
