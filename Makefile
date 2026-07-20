@@ -9,5 +9,8 @@ migrate:
 test:
 	go test ./...
 
+check:
+	go build ./...
+
 build:
 	go build -o bin/server cmd/server/main.go
