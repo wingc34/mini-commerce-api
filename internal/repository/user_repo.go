@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-// UserRepository defines the database operations for products.
+// UserRepository defines the database operations for users.
 // Defining this as an interface (not a concrete struct) lets us inject
 // a mock implementation in tests without touching a real database.
 type UserRepository interface {
