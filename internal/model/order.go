@@ -26,4 +26,5 @@ type Order struct {
 	CreatedAt         time.Time   `gorm:"autoCreateTime"                                   json:"createdAt"`
 	DraftOrderID      string      `gorm:"uniqueIndex;not null"                             json:"draftOrderId"`
 	DraftOrder        DraftOrder  `gorm:"foreignKey:DraftOrderID"                          json:"draftOrder,omitempty"`
+	OrderItems        []OrderItem `gorm:"foreignKey:OrderID"                           json:"orderItems,omitempty"`
 }
