@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 
+	"github.com/wingc34/mini-commerce-api/internal/config"
 	"github.com/wingc34/mini-commerce-api/internal/model"
 	"github.com/wingc34/mini-commerce-api/internal/repository"
 )
@@ -23,14 +24,11 @@ func NewProductService(repo repository.ProductRepository) ProductService {
 }
 
 func (s *productService) GetProducts(page int) ([]model.Product, int64, error) {
-	// 呼叫 repo，page size 固定 9
-	pageSize := 9
-	return s.repo.FindAll(page, pageSize)
+	return s.repo.FindAll(page, config.ProductPageSize)
 }
 
 func (s *productService) GetRecommended() ([]model.Product, error) {
-	// 呼叫 repo，limit 固定 4
-	products, err := s.repo.FindRecommended(4)
+	products, err := s.repo.FindRecommended(config.RecommendedLimit)
 	if err != nil {
 		return nil, err
 	}

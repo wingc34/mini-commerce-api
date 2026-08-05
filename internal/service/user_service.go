@@ -53,15 +53,59 @@ func (s *userService) GetAddresses(userID string) ([]model.Address, error) {
 }
 
 func (s *userService) CreateAddress(address *model.Address) error {
+	// 查現有地址數量
+	addresses, err := s.addressRepo.FindAllByUserID(address.UserID)
+	if err != nil {
+		return err
+	}
+
+	// 第一個地址自動設為 default
+	if len(addresses) == 0 {
+		address.IsDefault = true
+	}
+
+	// 如果要設為 default，先清除舊的
+	if address.IsDefault {
+		if err := s.addressRepo.ClearDefault(address.UserID); err != nil {
+			return err
+		}
+	}
+
 	return s.addressRepo.Create(address)
 }
 
 func (s *userService) UpdateAddress(address *model.Address) error {
+	if address.IsDefault {
+		if err := s.addressRepo.ClearDefault(address.UserID); err != nil {
+			return err
+		}
+	}
 	return s.addressRepo.Update(address)
 }
 
 func (s *userService) DeleteAddress(id string, userID string) error {
-	return s.addressRepo.SoftDelete(id, userID)
+	address, err := s.addressRepo.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	// Soft delete
+	if err := s.addressRepo.SoftDelete(id, userID); err != nil {
+		return err
+	}
+
+	// 如果刪的是 default，提升另一個為 default
+	if address.IsDefault {
+		addresses, err := s.addressRepo.FindAllByUserID(userID)
+		if err != nil {
+			return err
+		}
+		if len(addresses) > 0 {
+			return s.addressRepo.SetDefault(addresses[0].ID, userID)
+		}
+	}
+
+	return nil
 }
 
 func (s *userService) SetDefaultAddress(id string, userID string) error {
