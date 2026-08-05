@@ -14,6 +14,8 @@ type UserRepository interface {
 	FindByEmail(email string) (*model.User, error)
 	UpsertByGoogle(user *model.User) error // Google OAuth 登入時用
 	Update(user *model.User) error
+	AddWishItem(userID string, productID string) error
+	RemoveWishItem(userID string, productID string) error
 }
 
 // userRepository is the GORM implementation of UserRepository.
@@ -63,4 +65,19 @@ func (r *userRepository) Update(user *model.User) error {
 	// 例如只傳了 name，就只更新 name，不影響其他欄位
 	result := r.db.Model(user).Updates(user)
 	return result.Error
+}
+
+// AddWishItem inserts a new row into the wishlists join table.
+func (r *userRepository) AddWishItem(userID string, productID string) error {
+	wishlist := model.Wishlist{
+		UserID:    userID,
+		ProductID: productID,
+	}
+	return r.db.Create(&wishlist).Error
+}
+
+// RemoveWishItem deletes a row from the wishlists join table.
+func (r *userRepository) RemoveWishItem(userID string, productID string) error {
+	return r.db.Where("user_id = ? AND product_id = ?", userID, productID).
+		Delete(&model.Wishlist{}).Error
 }

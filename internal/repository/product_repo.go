@@ -12,6 +12,7 @@ type ProductRepository interface {
 	FindByID(id string) (*model.Product, error)
 	FindAll(page int, pageSize int) ([]model.Product, int64, error)
 	FindRecommended(limit int) ([]model.Product, error)
+	CheckStock(productID string, attrsJSON string) (bool, error)
 }
 
 // productRepository is the GORM implementation of ProductRepository.
@@ -70,4 +71,12 @@ func (r *productRepository) FindRecommended(limit int) ([]model.Product, error) 
 		return nil, err
 	}
 	return products, nil
+}
+
+func (r *productRepository) CheckStock(productID string, attrsJSON string) (bool, error) {
+	var count int64
+	err := r.db.Model(&model.SKU{}).
+		Where("product_id = ? AND attributes = ?::jsonb AND stock > 0", productID, attrsJSON).
+		Count(&count).Error
+	return count > 0, err
 }
