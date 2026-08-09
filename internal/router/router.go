@@ -15,6 +15,12 @@ func SetupRouter(
 	jwtSecret string,
 ) *gin.Engine {
 	r := gin.Default()
+	r.SetTrustedProxies([]string{"127.0.0.1"})
+
+	// Health check
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
 	// Public routes
 	public := r.Group("/api/v1")
