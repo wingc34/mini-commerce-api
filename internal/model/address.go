@@ -17,7 +17,7 @@ type Address struct {
 	State     *string        `json:"state"`
 	Postal    string         `gorm:"not null" json:"postal"`
 	Country   string         `gorm:"not null" json:"country"`
-	IsDefault bool           `gorm:"not null;default:'false'" json:"isDefault"`
+	IsDefault bool           `gorm:"not null;default:false" json:"isDefault"`
 	CreatedAt time.Time      `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt time.Time      `gorm:"autoUpdateTime" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
