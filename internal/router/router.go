@@ -17,6 +17,9 @@ func SetupRouter(
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 
+	// Global middleware
+	r.Use(middleware.CORS())
+
 	// Health check
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
