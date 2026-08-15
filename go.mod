@@ -1,6 +1,6 @@
 module github.com/wingc34/mini-commerce-api
 
-go 1.26.2
+go 1.25.0
 
 require (
 	github.com/gin-contrib/cors v1.7.7
