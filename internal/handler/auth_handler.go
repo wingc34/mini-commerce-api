@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wingc34/mini-commerce-api/internal/service"
@@ -35,6 +37,10 @@ func (h *AuthHandler) HandleGoogleCallback(c *gin.Context) {
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	frontendURL := os.Getenv("FRONTEND_URL")
+	c.Redirect(http.StatusTemporaryRedirect,
+		fmt.Sprintf("%s/login-confirm?token=%s", frontendURL, token))
 
 	// 回傳 JWT 給前端
 	response.Success(c, gin.H{"token": token})
