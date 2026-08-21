@@ -48,7 +48,31 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 		return
 	}
 
-	response.Success(c, user)
+	totalOrders, totalSpent, err := h.service.GetOrderStats(userID)
+	if err != nil {
+		response.Error(c, http.StatusInternalServerError, "failed to get order stats")
+		return
+	}
+
+	var defaultAddress *model.Address
+	if len(user.Addresses) > 0 {
+		defaultAddress = &user.Addresses[0]
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"data": gin.H{
+			"id":             user.ID,
+			"email":          user.Email,
+			"name":           user.Name,
+			"image":          user.Image,
+			"phoneNumber":    user.PhoneNumber,
+			"wishlist":       user.Wishlist,
+			"defaultAddress": defaultAddress,
+			"totalOrders":    totalOrders,
+			"totalSpent":     totalSpent,
+			"createdAt":      user.CreatedAt,
+		},
+	})
 }
 
 func (h *UserHandler) UpdateMe(c *gin.Context) {

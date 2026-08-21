@@ -22,7 +22,7 @@ type OrderRepository interface {
 	FindByID(id string) (*model.Order, error)
 	FindByUserID(userID string, page int, pageSize int) ([]model.Order, int64, error)
 
-	// Dual lookup（先查 orders，找不到再查 draft_orders）
+	// Dual lookup
 	FindOrderOrDraftByID(id string) (*model.Order, *model.DraftOrder, error)
 }
 
@@ -39,18 +39,16 @@ func NewOrderRepository(db *gorm.DB) OrderRepository {
 }
 
 func (r *orderRepository) CreateDraft(draft *model.DraftOrder, items []model.DraftOrderItem) error {
-	// 提示：GORM transaction 的寫法
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// 在這裡的所有操作都在同一個 transaction 裡
 		if err := tx.Create(draft).Error; err != nil {
-			return err // 回傳 error 會自動 rollback
+			return err
 		}
 		for _, item := range items {
 			if err := tx.Create(&item).Error; err != nil {
-				return err // 回傳 error 會自動 rollback
+				return err
 			}
 		}
-		return nil // 回傳 nil 會自動 commit
+		return nil
 	})
 }
 
@@ -79,7 +77,6 @@ func (r *orderRepository) FindDraftItemsByDraftID(draftID string) ([]model.Draft
 	return items, nil
 }
 
-// CreateOrder 只負責 INSERT，不管業務邏輯
 func (r *orderRepository) CreateOrder(order *model.Order, items []model.OrderItem) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(order).Error; err != nil {
@@ -102,14 +99,12 @@ func (r *orderRepository) FindByUserID(userID string, page int, pageSize int) ([
 
 	offset := (page - 1) * pageSize
 
-	// 先查總數，讓前端知道總共有幾頁
 	if err := r.db.Model(&model.Order{}).
 		Where("user_id = ?", userID).
 		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 再查當頁的資料
 	err := r.db.Where("user_id = ?", userID).
 		Order("created_at DESC").
 		Offset(offset).
@@ -134,23 +129,19 @@ func (r *orderRepository) FindByID(id string) (*model.Order, error) {
 }
 
 func (r *orderRepository) FindOrderOrDraftByID(id string) (*model.Order, *model.DraftOrder, error) {
-	// 第一步：先查 orders 表
 	var order model.Order
 	err := r.db.Preload("ShippingAddress").
-		Preload("OrderItems").
+		Preload("OrderItems.SKU.Product").
 		First(&order, "id = ?", id).Error
 
-	// 找到了，直接回傳
 	if err == nil {
 		return &order, nil, nil
 	}
 
-	// 如果是其他錯誤（不是找不到），回傳錯誤
 	if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil, err
 	}
 
-	// 第二步：order 找不到，改查 draft_orders
 	var draft model.DraftOrder
 	err = r.db.Preload("ShippingAddress").
 		First(&draft, "id = ?", id).Error

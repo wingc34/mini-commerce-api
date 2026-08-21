@@ -8,6 +8,7 @@ import (
 type UserService interface {
 	GetMe(userID string) (*model.User, error)
 	UpdateMe(userID string, name *string, phoneNumber *string) error
+	GetOrderStats(userID string) (int64, int64, error)
 
 	// Address
 	GetAddresses(userID string) ([]model.Address, error)
@@ -48,23 +49,24 @@ func (s *userService) UpdateMe(userID string, name *string, phoneNumber *string)
 	})
 }
 
+func (s *userService) GetOrderStats(userID string) (int64, int64, error) {
+	return s.userRepo.GetOrderStats(userID)
+}
+
 func (s *userService) GetAddresses(userID string) ([]model.Address, error) {
 	return s.addressRepo.FindAllByUserID(userID)
 }
 
 func (s *userService) CreateAddress(address *model.Address) error {
-	// 查現有地址數量
 	addresses, err := s.addressRepo.FindAllByUserID(address.UserID)
 	if err != nil {
 		return err
 	}
 
-	// 第一個地址自動設為 default
 	if len(addresses) == 0 {
 		address.IsDefault = true
 	}
 
-	// 如果要設為 default，先清除舊的
 	if address.IsDefault {
 		if err := s.addressRepo.ClearDefault(address.UserID); err != nil {
 			return err
@@ -94,7 +96,6 @@ func (s *userService) DeleteAddress(id string, userID string) error {
 		return err
 	}
 
-	// 如果刪的是 default，提升另一個為 default
 	if address.IsDefault {
 		addresses, err := s.addressRepo.FindAllByUserID(userID)
 		if err != nil {
