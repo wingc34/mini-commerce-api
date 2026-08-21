@@ -16,6 +16,7 @@ type UserRepository interface {
 	Update(user *model.User) error
 	AddWishItem(userID string, productID string) error
 	RemoveWishItem(userID string, productID string) error
+	GetOrderStats(userID string) (totalOrders int64, totalSpent int64, error error)
 }
 
 // userRepository is the GORM implementation of UserRepository.
@@ -33,7 +34,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 // FindByID returns a single user by their ID.
 func (r *userRepository) FindByID(id string) (*model.User, error) {
 	var user model.User
-	err := r.db.Preload("Wishlist").First(&user, "id = ?", id).Error
+	err := r.db.Preload("Wishlist.Product.SKUs").Preload("Addresses", "is_default = ?", true).First(&user, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
@@ -80,4 +81,24 @@ func (r *userRepository) AddWishItem(userID string, productID string) error {
 func (r *userRepository) RemoveWishItem(userID string, productID string) error {
 	return r.db.Where("user_id = ? AND product_id = ?", userID, productID).
 		Delete(&model.Wishlist{}).Error
+}
+
+func (r *userRepository) GetOrderStats(userID string) (int64, int64, error) {
+    var totalOrders int64
+    var totalSpent int64
+
+    if err := r.db.Model(&model.Order{}).
+        Where("user_id = ?", userID).
+        Count(&totalOrders).Error; err != nil {
+        return 0, 0, err
+    }
+
+    if err := r.db.Model(&model.Order{}).
+        Where("user_id = ?", userID).
+        Select("COALESCE(SUM(total), 0)").
+        Scan(&totalSpent).Error; err != nil {
+        return 0, 0, err
+    }
+
+    return totalOrders, totalSpent, nil
 }
