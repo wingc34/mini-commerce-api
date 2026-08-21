@@ -6,6 +6,9 @@ run:
 migrate:
 	docker exec -i mini-commerce-api-postgres-1 psql -U postgres -d mini_commerce < migrations/001_init.sql
 
+seed:
+	docker exec -i mini-commerce-api-postgres-1 psql -U postgres -d mini_commerce < migrations/seed.sql
+
 test:
 	go test ./...
 
