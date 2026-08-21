@@ -33,7 +33,7 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 // FindByID returns a single user by their ID.
 func (r *userRepository) FindByID(id string) (*model.User, error) {
 	var user model.User
-	err := r.db.First(&user, "id = ?", id).Error
+	err := r.db.Preload("Wishlist").First(&user, "id = ?", id).Error
 	if err != nil {
 		return nil, err
 	}
