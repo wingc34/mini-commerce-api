@@ -12,6 +12,7 @@ func SetupRouter(
 	userHandler *handler.UserHandler,
 	orderHandler *handler.OrderHandler,
 	webhookHandler *handler.WebhookHandler,
+	paymentHandler *handler.PaymentHandler,
 	jwtSecret string,
 ) *gin.Engine {
 	r := gin.Default()
@@ -33,6 +34,7 @@ func SetupRouter(
 	// Protected routes
 	protected := r.Group("/api/v1")
 	protected.Use(middleware.Auth(jwtSecret))
+	protected.POST("/payments/intent", paymentHandler.CreatePaymentIntent)
 	registerUserRoutes(protected, userHandler)
 	registerOrderRoutes(protected, orderHandler)
 

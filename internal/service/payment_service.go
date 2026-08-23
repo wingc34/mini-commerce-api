@@ -61,7 +61,11 @@ func (s *paymentService) CreatePaymentIntent(amount int64, draftOrderID string) 
 // On payment_intent.succeeded, it creates a real Order from the DraftOrder.
 func (s *paymentService) HandleWebhook(payload []byte, sigHeader string) error {
 	// 第一步：驗證 Stripe 簽名，防止假冒的 webhook 請求
-	event, err := webhook.ConstructEvent(payload, sigHeader, s.webhookSecret)
+	event, err := webhook.ConstructEventWithOptions(payload, sigHeader, s.webhookSecret,
+		webhook.ConstructEventOptions{
+			IgnoreAPIVersionMismatch: true,
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("invalid webhook signature: %w", err)
 	}
