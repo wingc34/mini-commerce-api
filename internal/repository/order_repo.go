@@ -144,6 +144,7 @@ func (r *orderRepository) FindOrderOrDraftByID(id string) (*model.Order, *model.
 
 	var draft model.DraftOrder
 	err = r.db.Preload("ShippingAddress").
+		Preload("DraftOrderItems.SKU.Product").
 		First(&draft, "id = ?", id).Error
 	if err != nil {
 		return nil, nil, err

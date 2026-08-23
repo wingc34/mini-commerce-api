@@ -2,6 +2,7 @@ package handler
 
 import (
 	"io"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -29,6 +30,7 @@ func (h *WebhookHandler) HandleStripeWebhook(c *gin.Context) {
 
 	err = h.service.HandleWebhook(payload, sigHeader)
 	if err != nil {
+		log.Printf("❌ Webhook error: %v", err)
 		response.Error(c, http.StatusInternalServerError, err.Error())
 		return
 	}

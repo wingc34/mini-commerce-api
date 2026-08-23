@@ -47,6 +47,7 @@ func main() {
 	productHandler := handler.NewProductHandler(productService)
 	orderHandler := handler.NewOrderHandler(orderService)
 	webhookHandler := handler.NewWebhookHandler(paymentService)
+	paymentHandler := handler.NewPaymentHandler(paymentService)
 
 	// 6. 設定 Gin mode
 	if cfg.Env == "production" {
@@ -60,6 +61,7 @@ func main() {
 		userHandler,
 		orderHandler,
 		webhookHandler,
+		paymentHandler,
 		cfg.JWTSecret,
 	)
 
