@@ -17,3 +17,9 @@ check:
 
 build:
 	go build -o bin/server cmd/server/main.go
+
+docker-up:
+	docker-compose up --build
+
+docker-down:
+	docker-compose down
