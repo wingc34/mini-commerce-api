@@ -11,6 +11,7 @@ type Config struct {
 	Port                string
 	Env                 string
 	DatabaseURL         string
+	FrontendURL         string
 	JWTSecret           string
 	JWTExpiryHours      string
 	GoogleClientID      string
@@ -32,6 +33,7 @@ func Load() *Config {
 		Port:                getEnv("PORT", "8080"),
 		Env:                 getEnv("ENV", "development"),
 		DatabaseURL:         getEnv("DATABASE_URL", ""),
+		FrontendURL:         getEnv("FRONTEND_URL", ""),
 		JWTSecret:           getEnv("JWT_SECRET", ""),
 		JWTExpiryHours:      getEnv("JWT_EXPIRY_HOURS", "24"),
 		GoogleClientID:      getEnv("GOOGLE_CLIENT_ID", ""),
