@@ -14,12 +14,13 @@ func SetupRouter(
 	webhookHandler *handler.WebhookHandler,
 	paymentHandler *handler.PaymentHandler,
 	jwtSecret string,
+	frontendURL string,
 ) *gin.Engine {
 	r := gin.Default()
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 
 	// Global middleware
-	r.Use(middleware.CORS())
+	r.Use(middleware.CORS(frontendURL))
 
 	// Health check
 	r.GET("/health", func(c *gin.Context) {

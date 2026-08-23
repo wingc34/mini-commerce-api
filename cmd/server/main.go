@@ -63,6 +63,7 @@ func main() {
 		webhookHandler,
 		paymentHandler,
 		cfg.JWTSecret,
+		cfg.FrontendURL,
 	)
 
 	// 8. 啟動 server
